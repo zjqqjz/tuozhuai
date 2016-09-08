@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>标题</title>
+<meta name="keywords" content="">
+<meta name="description" content="">
+<script src="socket.io.js"></script>
+<style>
+	#div1{
+		width:100px;height:100px;background: red;
+		position: absolute;;left:0;top:0;
+	}
+</style>
+</head>
+<body>
+	<h1>我是正确的200</h1>
+	<input type="button"  value="连接" id="btn">
+	<div id="div1"></div>
+</body>
+<script>
+	window.onload = function(){
+		var oBtn = document.getElementById('btn');
+		var oDiv = document.getElementById("div1");
+		var socket =null;
+
+		oBtn.onclick = function(){
+
+			socket = io.connect('http://localhost:8888');
+
+		
+			socket.on('hello',function(data){
+				alert(data);
+			});
+
+			socket.on('a',function(data){
+				alert(data);
+			});
+
+			socket.on('move2',function(data){
+				oDiv.style.left=data.left + 'px';
+				oDiv.style.top=data.top + 'px';
+			});
+
+		}
+
+		oDiv.onmousedown=function(e){
+		var evt = e || event;
+		var disX = evt.clientX - oDiv.offsetLeft;
+		var disY = evt.clientY - oDiv.offsetTop;
+		document.onmousemove =function(e){
+			var evt = e || event;
+			var clientWidth = document.documentElement.clientWidth;
+			var clientHeight = document.documentElement.clientHeight;
+			var x = evt.clientX - disX;//块的左边距
+			var y = evt.clientY - disY;//块的右边距
+			
+			if(x<0){	
+				x=0;
+			}else if(x > clientWidth-oDiv.offsetWidth){
+				x = clientWidth-oDiv.offsetWidth
+			}
+			if(y<0){
+				y=0;
+			}else if( y> clientHeight-oDiv.offsetHeight){
+				y = clientHeight-oDiv.offsetHeight
+			}
+			
+			
+			oDiv.style.left = x +"px";
+			oDiv.style.top = y +"px";
+
+			socket.emit('move',{
+				left:x,
+				top:y
+			});
+
+		}
+		document.onmouseup =function(e){
+			document.onmousemove = null;
+		}
+		}
+
+	}
+</script>
+</html>
